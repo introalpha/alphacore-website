@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AlphaCore - 자동매매 프로그램</title>
+  <style>
+    :root {
+      --bg: #1e1b4b;          /* deep purple-900 */
+      --panel: #1e1b4bea;     /* deep purple-900 w/ alpha */
+      --muted: #c4b5fd;       /* purple-300 */
+      --text: #f5f3ff;        /* purple-50 */
+      --accent: #a78bfa;      /* purple-400 */
+      --accent-dark: #7c3aed; /* purple-600 */
+      --border: #4c1d95;      /* purple-900 */
+      --danger: #ef4444;
+    }
+    
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    
+    body {
+      font-family: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #4c1d95 10%, transparent 60%),
+                  radial-gradient(800px 400px at 110% 10%, #7c3aed 0%, transparent 50%),
+                  var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      width: 400px;
+      height: 400px;
+      background-image: url('./watermark-logo.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.05;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: white;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(167, 139, 250, 0.5);
+    }
+    
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 5px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #c4b5fd, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+      text-shadow: 0 2px 10px rgba(167, 139, 250, 0.3);
+    }
+
+    .intro {
+      text-align: center;
+      margin: 30px 0 40px;
+    }
+
+    .intro h2 {
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: #f8fafc;
+    }
+
+    .intro p {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .qr-section {
+      text-align: center;
+      margin: 40px 0;
+      padding: 30px 0;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .qr-code {
+      width: 230px;
+      height: 230px;
+      margin: 20px auto;
+      padding: 15px;
+      background: #0b1220;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-code img { width: 200px; height: 200px; display: block; object-fit: contain; }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.5);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+      border-color: #0ea5e9;
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #a78bfa, #7c3aed);
+      color: white;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 4px 15px rgba(167, 139, 250, 0.4);
+    }
+    
+    .btn-accent:hover {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      box-shadow: 0 6px 20px rgba(167, 139, 250, 0.6);
+    }
+
+    .features {
+      margin: 50px 0 30px;
+    }
+
+    .features h3 {
+      font-size: 22px;
+      margin-bottom: 24px;
+      color: #f8fafc;
+      text-align: center;
+    }
+
+    .feature {
+      background: rgba(15, 23, 42, 0.5);
+      padding: 24px;
+      margin: 16px 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .feature:hover {
+      transform: translateX(6px);
+      border-color: #a78bfa;
+      box-shadow: 0 4px 20px rgba(167, 139, 250, 0.2);
+    }
+
+    .feature h4 {
+      margin: 0 0 12px 0;
+      color: #c4b5fd;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    /* About (알파코어란) */
+    .about { background: rgba(15,23,42,0.5); border:1px solid var(--border); border-radius:12px; padding: 24px; margin: 40px 0; }
+    .about h3 { font-size: 22px; margin: 0 0 16px 0; color: #f8fafc; }
+    .about-content p { margin: 0 0 12px 0; color: var(--muted); line-height: 1.8; }
+    .about-list { margin: 8px 0 16px 16px; padding: 0; }
+    .about-list li { margin: 6px 0; color: #e9d5ff; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <div class="logo">
+                    <img src="./public/logo.png.png" alt="AlphaCore 로고">
+                </div>
+                <h1 class="title">AlphaCore</h1>
+            </div>
+        </header>
+        
+        <div class="intro">
+            <h2>스마트한 투자를 위한 AI 자동매매 솔루션</h2>
+            <p>최신 AI 기술을 활용한 안정적이고 효율적인 자동매매 시스템으로 더 나은 투자를 경험해보세요.</p>
+        </div>
+
+        <div class="qr-section">
+            <h3>고객센터 제리와 연결하기</h3>
+            <p>아래 QR코드를 스캔하시면 고객센터 제리와 바로 연결됩니다.</p>
+            <div class="qr-code">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://t.me/alphacorecs" alt="고객센터 제리 연결 QR 코드">
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="https://t.me/alphacoreoffical/17" class="btn btn-accent" target="_blank">
+                텔레그램 채널 바로가기
+            </a>
+            <a href="https://t.me/alphacorecs" class="btn" target="_blank">
+                상담원 연결하기
+            </a>
+            <a href="https://alphacore.kr" class="btn" target="_blank">
+                공식 홈페이지 방문하기
+            </a>
+        </div>
+
+        <div class="about">
+            <h3>알파코어란?</h3>
+            <div class="about-content">
+                <p>많은 투자자들이 시장의 변동성 때문에 어려움을 겪습니다.</p>
+                <p>24시간 열려 있는 코인 시장에서는 특히, 잠시의 방심으로도 기회를 잃기 쉽습니다.</p>
+
+                <p>저희는 이러한 문제를 해결하기 위해 AI 기반 자동매매 시스템을 구축했습니다.</p>
+                <p>이 시스템은 다음을 목표로 설계되었습니다.</p>
+                <ul class="about-list">
+                    <li>실시간 시장 분석을 통한 안정적 운용</li>
+                    <li>감정을 배제한 시스템적 매매</li>
+                    <li>꾸준한 자산 성장과 리스크 관리</li>
+                </ul>
+
+                <p>특히, 고객의 자산은 철저히 보호됩니다.</p>
+                <p>모든 거래는 고객 본인 계좌에서 직접 이루어지며, 언제든 자유롭게 출금할 수 있습니다.</p>
+                <p>저희는 가입비·회원비를 받지 않으며, 과장된 수익률을 약속하지 않습니다.</p>
+
+                <p>저희의 목표는 단순히 ‘단기 수익’이 아니라,</p>
+                <p>고객이 장기적으로 안정적인 자산 성장을 이룰 수 있도록 돕는 것입니다.</p>
+
+                <p>만약 재테크에 관심은 있지만 방법을 몰라 고민하고 계신다면,</p>
+                <p>AI 자동매매 시스템이 하나의 새로운 대안이 될 수 있습니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 50px; color: var(--muted); font-size: 0.9em;">
+        <p>© 2025 AlphaCore. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // 버튼 호버 효과 강화
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'translateY(-2px)';
+                btn.style.boxShadow = '0 6px 16px rgba(14, 165, 233, 0.3)';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translateY(0)';
+                btn.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
